@@ -39,7 +39,7 @@ class BaseHandler(webapp2.RequestHandler):
 class MainHandler(BaseHandler):
     def get(self):
     	client_id = rand_str(10)
-    	token = channel.create_channel(client_id)
+    	token = channel.create_channel(client_id, duration_minutes=24*60)
     	room_id = self.rget('room_id')
     	if not room_id: 
     		# create new room

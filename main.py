@@ -5,17 +5,22 @@ import random
 import string
 import webapp2
 
-
 from google.appengine.ext import db
 from google.appengine.api import channel
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape=True)
 
+CLOUDFRONT_DOMAIN = 'http://ddmm37kppyxwy.cloudfront.net/'
+
 class Rooms(db.Model):
 	message = db.StringProperty()
 	room_id = db.StringProperty()
 	client_ids = db.StringListProperty()
+
+class Movies(db.Model):
+	url = db.StringProperty()
+	name = db.StringProperty()
 
 class BaseHandler(webapp2.RequestHandler):
 	'''Parent class for all handlers'''
@@ -68,6 +73,19 @@ class UpdateHandler(BaseHandler):
 		for client_id in room.client_ids:
 			channel.send_message(client_id, message)
 
+class UploadHandler(BaseHandler):
+	def get(self):
+		self.render('upload.html')
+
+	def post(self):
+		filename = self.rget('filename')
+		url = CLOUDFRONT_DOMAIN + filename
+		name = self.rget('moviename')
+		movie = Movies(url=url, name=name)
+		movie.put()
+
+		self.write('Uploaded!')
+
 class ConnectHandler(BaseHandler):
 	def post(self):
 		client_id = self.request.get('from')
@@ -99,6 +117,7 @@ def get_room_by_client_id(client_id):
 	return q.get()
 
 app = webapp2.WSGIApplication([('/', MainHandler),
+							   ('/upload', UploadHandler),
 							   ('/update', UpdateHandler),
 							   ('/_ah/channel/connected/', ConnectHandler),
 							   ('/_ah/channel/disconnected/', DisconnectHandler),

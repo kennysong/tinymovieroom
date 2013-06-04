@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+
+	<head>
+		<title>Upload Film</title>
+
+		<script type="text/javascript" src="/static/js/jquery-2.0.2.min.js"></script>
+		<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
+		<link rel="stylesheet" href="/static/css/bootstrap.css">
+	</head>
+
+	<body>
+		<form method="post" action="/upload">
+			<input class="btn btn-primary" type="button" id="upload" value="Pick File">
+			<input type="text" name="moviename" id="moviename" placeholder="Movie Name">
+			<br/>
+			<input type="submit" class="btn btn-success" >
+			<input type="hidden" name="filename" id="filename">
+		</form>
+		<div id="notify"></div>
+
+		<script type="text/javascript">
+		filepicker.setKey('ACWuaLtiQ7eFY8yjBnrHFz');
+	
+		$('#upload').click(function(e){
+			e.preventDefault();
+			filepicker.pickAndStore({}, {location: 'S3', access: 'public'}, function(fpfiles){
+				var filename = fpfiles[0]['key'];
+				$('#filename').val(filename);
+				var moviename = fpfiles[0]['filename'];
+				$('#moviename').val(moviename.slice(0,moviename.lastIndexOf('.')));
+			});
+		});
+		</script>
+
+	</body>
+
+</html>

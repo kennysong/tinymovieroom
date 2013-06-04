@@ -20,7 +20,9 @@
 		<input id="message" type="text" class="input-medium search-query">
 		<button id="submit" type="submit" class="btn">Search</button>
 
-		<a href="/?room_id={{room_id}}">localhost:8090/?room_id={{room_id}}</a>
+		<div><a href="/?room_id={{room_id}}">localhost:8090/?room_id={{room_id}}</a></div>
+		<div id="status"></div>
+
 
 		<script>
 			var token = '{{ token }}';
@@ -28,7 +30,13 @@
 			var client_id = '{{ client_id }}';
 
 			var onMessage = function(m) {
-				$('#display').text(m.data);
+				if (m.data.indexOf('connected') !== -1) {
+					//presence message
+					$('#status').text(m.data);
+				} else {
+					//update message
+					$('#display').text(m.data);
+				}				
 			}
 
 			channel = new goog.appengine.Channel('{{ token }}');

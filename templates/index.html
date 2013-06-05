@@ -10,9 +10,15 @@
 		<script type="text/javascript" src="/static/js/video.dev.js"></script>
 		<link rel="stylesheet" href="/static/css/bootstrap.css">
 		<link rel="stylesheet" href="/static/css/video-js.css">
+
+		<style type="text/css">
+		.vjs-control-bar { font-size: 93% }
+		</style>
 	</head>
 
 	<body>
+
+
 		<div id="display">
 			{{ room_id }}
 			{{ token }}
@@ -47,18 +53,18 @@
 
 	  				var changed = (paused !== lastPaused);
 	  				lastPaused = paused;
-	  				console.log(changed)
 
 	  				if (!changed) {
 						// check time
 						var time = myPlayer.currentTime();
 						var dt = Math.abs(time - lastPlayTime);
 						lastPlayTime = time;
-						if (dt > 1.5) { // 1.5sec threshold perturbation
-							console.log('seek')
+						if (dt > 1.5) { 
+							// 1.5sec threshold perturbation
 							$.post('/seek', {time: time, room_id: room_id, client_id: client_id});
-						}						
-					} else if (!paused && changed) { //started playing after pause
+						}
+					} else if (!paused && changed) { 
+						// started playing after pause
 						lastPlayTime = myPlayer.currentTime();
 					}
 				}, 1000)
@@ -76,20 +82,27 @@
 					var client_id = update['client_id'];
 					var connect = (update['connect']) ? 'connected' : 'disconnected';
 					$('#status').text('User ' + client_id + ' has ' + connect + '.');
+
 				} else if (update['type'] == 'paused') {
 					// video notification
 					var paused = update['paused'];
 					var client_id = update['client_id'];
 					if (paused) {
-						myPlayer.pause()
+						myPlayer.pause();
 						$('#videonotif').text('User ' + client_id + ' paused the video.');
 					} else {
-						myPlayer.play()
+						myPlayer.play();
 						$('#videonotif').text('User ' + client_id + ' played the video.');
 					}
+
 				} else if (update['type'] == 'seek') {
 					//update message
-					$('#display').text(m.data);
+					time = update['time'];
+					client_id = update['client_id'];
+
+					myPlayer.currentTime(time);					
+
+					$('#videonotif').text('User ' + client_id + ' seeked within the video.');
 				}				
 			}
 
@@ -97,12 +110,6 @@
 			socket = channel.open();
 
 			socket.onmessage = onMessage;
-
-			// $('#submit').click(function(e){
-	  //           e.preventDefault();
-	  //           var message = $('#message').val();
-	  //           $.post('/update', {room_id: room_id, message: message});
-	  //       });
 		</script>
 
 	</body>

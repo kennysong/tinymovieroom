@@ -24,6 +24,7 @@ class Rooms(db.Model):
 	message = db.StringProperty()
 	room_id = db.StringProperty()
 	client_ids = db.StringListProperty()
+	paused = db.BooleanProperty()
 
 class Movies(db.Model):
 	url = db.StringProperty()
@@ -57,7 +58,7 @@ class MainHandler(BaseHandler):
     	if not room_id: 
     		# create new room
     		room_id = rand_str(5)
-    		room = Rooms(room_id=room_id, client_ids=[client_id])
+    		room = Rooms(room_id=room_id, client_ids=[client_id], paused=True)
     		room.put()
     	else:
 			# add user to existing room
@@ -123,6 +124,23 @@ class DisconnectHandler(BaseHandler):
 		for c_id in room.client_ids:
 			channel.send_message(c_id, 'User %s has disconnected.'%client_id)
 
+class PausedHandler(BaseHandler):
+	def post(self):
+		client_id = self.rget('client_id')
+		room_id = self.rget('room_id')
+		paused = bool(int(self.rget('paused')))
+		room = get_room_by_room_id(room_id)
+
+		if room.paused != paused:
+			room.paused = paused
+			room.put()
+			for c_id in room.client_ids:
+				if paused:
+					channel.send_message(c_id, 'User %s paused the video.'%client_id)
+				else:
+					channel.send_message(c_id, 'User %s played the video.'%client_id)
+
+
 def rand_str(n):
 	return ''.join(random.choice(string.ascii_lowercase) for x in range(n))
 
@@ -139,6 +157,7 @@ def get_room_by_client_id(client_id):
 app = webapp2.WSGIApplication([('/', MainHandler),
 							   ('/upload', UploadHandler),
 							   ('/update', UpdateHandler),
+							   ('/paused', PausedHandler),
 							   ('/_ah/channel/connected/', ConnectHandler),
 							   ('/_ah/channel/disconnected/', DisconnectHandler),
 							  ], debug=True)

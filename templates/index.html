@@ -24,6 +24,7 @@
 
 		<div><a href="/?room_id={{room_id}}">localhost:10080/?room_id={{room_id}}</a></div>
 		<div id="status"></div>
+		<div id="videonotif"></div>
 
 		<video id="player" class="video-js vjs-default-skin"
 		  controls preload="auto" width="640" height="264"
@@ -33,14 +34,26 @@
 
 		<!-- Video.js Scripts -->
 		<script type="text/javascript">
-		videojs.options.flash.swf = "/static/video-js.swf"
+			videojs.options.flash.swf = "/static/video-js.swf"
 
+			var myPlayer = videojs("player");
 
-		</script>
+			myPlayer.ready(function(){
+	  			var myPlayer = this;
 
+	  			setInterval(function() {   				
+	  				// check if paused
+	  				var paused = myPlayer.paused() ? 1 : 0;
 
-		<!-- Channel API Scripts -->
-		<script type="text/javascript">
+	  				$.post('/paused', {paused: paused, room_id: room_id, client_id: client_id});
+
+					// check time
+					var time = parseInt(myPlayer.currentTime()+0.5);
+					console.log(time);
+				}, 1000)
+		
+			});
+
 			var token = '{{ token }}';
 			var room_id = '{{ room_id }}';
 			var client_id = '{{ client_id }}';
@@ -49,6 +62,15 @@
 				if (m.data.indexOf('connected') !== -1) {
 					//presence message
 					$('#status').text(m.data);
+				} else if (m.data.indexOf('paused') !== -1) {
+					// video notification
+					$('#videonotif').text(m.data);
+					myPlayer.pause()
+				} else if (m.data.indexOf('played') !== -1) {
+					// video notification
+					$('#videonotif').text(m.data);
+					myPlayer.play()
+
 				} else {
 					//update message
 					$('#display').text(m.data);

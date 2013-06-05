@@ -108,10 +108,11 @@ class UploadHandler(BaseHandler):
 class ConnectHandler(BaseHandler):
 	def post(self):
 		client_id = self.request.get('from')
+		logging.error(client_id)
 		room = get_room_by_client_id(client_id)
 
-		for client_id in room.client_ids:
-			channel.send_message(client_id, 'User %s has connected.'%client_id)
+		for c_id in room.client_ids:
+			channel.send_message(c_id, 'User %s has connected.'%client_id)
 
 
 class DisconnectHandler(BaseHandler):
@@ -119,8 +120,8 @@ class DisconnectHandler(BaseHandler):
 		client_id = self.rget('from')
 		room = get_room_by_client_id(client_id)
 
-		for client_id in room.client_ids:
-			channel.send_message(client_id, 'User %s has disconnected.'%client_id)
+		for c_id in room.client_ids:
+			channel.send_message(c_id, 'User %s has disconnected.'%client_id)
 
 def rand_str(n):
 	return ''.join(random.choice(string.ascii_lowercase) for x in range(n))

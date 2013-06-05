@@ -51,22 +51,27 @@ class BaseHandler(webapp2.RequestHandler):
 		self.response.headers.add_header('Set-Cookie', '%s=; Path=/' % cookie)
 
 class MainHandler(BaseHandler):
-    def get(self):
-    	client_id = rand_str(10)
-    	token = channel.create_channel(client_id, duration_minutes=24*60)
-    	room_id = self.rget('room_id')
-    	if not room_id: 
-    		# create new room
-    		room_id = rand_str(5)
-    		room = Rooms(room_id=room_id, client_ids=[client_id], paused=True)
-    		room.put()
-    	else:
+	def get(self):
+		client_id = rand_str(10)
+		token = channel.create_channel(client_id, duration_minutes=24*60)
+		room_id = self.rget('room_id')
+		if not room_id: 
+			# create new room
+			room_id = rand_str(5)
+			room = Rooms(room_id=room_id, client_ids=[client_id], paused=True)
+			room.put()
+		else:
 			# add user to existing room
 			room = get_room_by_room_id(room_id)
 			room.client_ids.append(client_id)
 			room.put()
 
-        self.render('index.html', {'client_id':client_id, 'room_id':room_id, 'token':token})
+		# random movie
+		movie = Movies.all().get()
+		url = movie.url
+		img_url = movie.img_url
+
+		self.render('index.html', {'client_id':client_id, 'room_id':room_id, 'token':token, 'img_url':img_url, 'url':url})
 
 class UploadHandler(BaseHandler):
 	def get(self):

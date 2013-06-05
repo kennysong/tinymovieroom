@@ -12,7 +12,7 @@
 		<link rel="stylesheet" href="/static/css/video-js.css">
 
 		<style type="text/css">
-		.vjs-control-bar { font-size: 93% }
+		.vjs-control-bar { font-size: 110% }
 		</style>
 	</head>
 
@@ -30,9 +30,9 @@
 		<div id="videonotif"></div>
 
 		<video id="player" class="video-js vjs-default-skin"
-		  controls preload="auto" width="640" height="264"
+		  controls preload="auto" width="800" height="450" poster="{{img_url}}"
 		  data-setup='{ "controls": true, "autoplay": false, "preload": "auto" }'>
-		 <source src="http://ddmm37kppyxwy.cloudfront.net/Daft%20Punk%20-%20Get%20Lucky%20__%20George%20Barnett%20cover.mp4" type='video/mp4' />
+		 <source src="{{url}}" type='video/mp4' />
 		</video>
 
 		<!-- Video.js Scripts -->

@@ -37,6 +37,8 @@
 			videojs.options.flash.swf = "/static/video-js.swf"
 
 			var myPlayer = videojs("player");
+			var lastPlayTime;
+			var lastPaused = true;
 
 			myPlayer.ready(function(){
 	  			var myPlayer = this;
@@ -44,12 +46,24 @@
 	  			setInterval(function() {   				
 	  				// check if paused
 	  				var paused = myPlayer.paused() ? 1 : 0;
-
 	  				$.post('/paused', {paused: paused, room_id: room_id, client_id: client_id});
 
-					// check time
-					var time = parseInt(myPlayer.currentTime()+0.5);
-					console.log(time);
+	  				var changed = (paused !== lastPaused);
+	  				lastPaused = paused;
+	  				console.log(changed)
+
+	  				if (!changed) {
+						// check time
+						var time = myPlayer.currentTime();
+						var dt = Math.abs(time - lastPlayTime);
+						lastPlayTime = time;
+						if (dt > 1.5) { // 1.5sec threshold perturbation
+							console.log('seek')
+							$.post('/seek', {time: time, room_id: room_id, client_id: client_id});
+						}						
+					} else if (!paused && changed) { //started playing after pause
+						lastPlayTime = myPlayer.currentTime();
+					}
 				}, 1000)
 		
 			});
@@ -59,19 +73,24 @@
 			var client_id = '{{ client_id }}';
 
 			var onMessage = function(m) {
-				if (m.data.indexOf('connected') !== -1) {
+				update = JSON.parse(m.data);
+				if (update['type'] == 'presence') {
 					//presence message
-					$('#status').text(m.data);
-				} else if (m.data.indexOf('paused') !== -1) {
+					var client_id = update['client_id'];
+					var connect = (update['connect']) ? 'connected' : 'disconnected';
+					$('#status').text('User ' + client_id + ' has ' + connect + '.');
+				} else if (update['type'] == 'paused') {
 					// video notification
-					$('#videonotif').text(m.data);
-					myPlayer.pause()
-				} else if (m.data.indexOf('played') !== -1) {
-					// video notification
-					$('#videonotif').text(m.data);
-					myPlayer.play()
-
-				} else {
+					var paused = update['paused'];
+					var client_id = update['client_id'];
+					if (paused) {
+						myPlayer.pause()
+						$('#videonotif').text('User ' + client_id + ' paused the video.');
+					} else {
+						myPlayer.play()
+						$('#videonotif').text('User ' + client_id + ' played the video.');
+					}
+				} else if (update['type'] == 'seek') {
 					//update message
 					$('#display').text(m.data);
 				}				

@@ -112,8 +112,10 @@ class ConnectHandler(BaseHandler):
 		logging.error(client_id)
 		room = get_room_by_client_id(client_id)
 
+		d = {'type':'presence', 'client_id':client_id, 'connect':1}
+
 		for c_id in room.client_ids:
-			channel.send_message(c_id, 'User %s has connected.'%client_id)
+			channel.send_message(c_id, simplejson.dumps(d))
 
 
 class DisconnectHandler(BaseHandler):
@@ -121,8 +123,10 @@ class DisconnectHandler(BaseHandler):
 		client_id = self.rget('from')
 		room = get_room_by_client_id(client_id)
 
+		d = {'type':'presence', 'client_id':client_id, 'connect':0}
+
 		for c_id in room.client_ids:
-			channel.send_message(c_id, 'User %s has disconnected.'%client_id)
+			channel.send_message(c_id, simplejson.dumps(d))
 
 class PausedHandler(BaseHandler):
 	def post(self):
@@ -131,15 +135,20 @@ class PausedHandler(BaseHandler):
 		paused = bool(int(self.rget('paused')))
 		room = get_room_by_room_id(room_id)
 
+		d = {'type':'paused', 'client_id':client_id, 'paused':int(paused)}
+
 		if room.paused != paused:
 			room.paused = paused
 			room.put()
 			for c_id in room.client_ids:
 				if paused:
-					channel.send_message(c_id, 'User %s paused the video.'%client_id)
+					channel.send_message(c_id, simplejson.dumps(d))
 				else:
-					channel.send_message(c_id, 'User %s played the video.'%client_id)
+					channel.send_message(c_id, simplejson.dumps(d))
 
+class SeekHandler(BaseHandler):
+	def post(self):
+		pass
 
 def rand_str(n):
 	return ''.join(random.choice(string.ascii_lowercase) for x in range(n))
@@ -158,6 +167,7 @@ app = webapp2.WSGIApplication([('/', MainHandler),
 							   ('/upload', UploadHandler),
 							   ('/update', UpdateHandler),
 							   ('/paused', PausedHandler),
+							   ('/seek', SeekHandler),
 							   ('/_ah/channel/connected/', ConnectHandler),
 							   ('/_ah/channel/disconnected/', DisconnectHandler),
 							  ], debug=True)

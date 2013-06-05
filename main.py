@@ -1,17 +1,24 @@
+
 import jinja2
 import logging
 import os
 import random
 import string
+import urllib
 import webapp2
+
+from django.utils import simplejson
 
 from google.appengine.ext import db
 from google.appengine.api import channel
+from google.appengine.api import urlfetch
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape=True)
 
 CLOUDFRONT_DOMAIN = 'http://ddmm37kppyxwy.cloudfront.net/'
+TMDB_SEARCH_URL = 'http://api.themoviedb.org/3/search/movie?api_key=fc45f4e0c19068d8253cb0dcb0a1774e&query='
+TMDB_IMG_URL = 'http://d3gtl9l2a4fn1j.cloudfront.net/t/p/w185'
 
 class Rooms(db.Model):
 	message = db.StringProperty()
@@ -21,6 +28,7 @@ class Rooms(db.Model):
 class Movies(db.Model):
 	url = db.StringProperty()
 	name = db.StringProperty()
+	img_url = db.StringProperty()
 
 class BaseHandler(webapp2.RequestHandler):
 	'''Parent class for all handlers'''
@@ -81,7 +89,18 @@ class UploadHandler(BaseHandler):
 		filename = self.rget('filename')
 		url = CLOUDFRONT_DOMAIN + filename
 		name = self.rget('moviename')
-		movie = Movies(url=url, name=name)
+
+		# find movie cover
+		search_name = urllib.quote(name)
+
+		fetched = urlfetch.fetch(TMDB_SEARCH_URL+search_name, headers={'Accept': 'application/json'})
+		json = simplejson.loads(fetched.content)
+		entry = json['results'][0]
+
+		img_path = entry['poster_path']
+		img_url = TMDB_IMG_URL + img_path
+
+		movie = Movies(url=url, name=name, img_url=img_url)
 		movie.put()
 
 		self.write('Uploaded!')

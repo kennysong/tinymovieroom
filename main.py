@@ -68,19 +68,19 @@ class MainHandler(BaseHandler):
 
         self.render('index.html', {'client_id':client_id, 'room_id':room_id, 'token':token})
 
-class UpdateHandler(BaseHandler):
-	def post(self):
-		room_id = self.rget('room_id')
-		message = self.rget('message')
+# class UpdateHandler(BaseHandler):
+# 	def post(self):
+# 		room_id = self.rget('room_id')
+# 		message = self.rget('message')
 
-		# change on db
-		room = get_room_by_room_id(room_id)
-		room.message = message
-		room.put()
+# 		# change on db
+# 		room = get_room_by_room_id(room_id)
+# 		room.message = message
+# 		room.put()
 
-		# push to clients
-		for client_id in room.client_ids:
-			channel.send_message(client_id, message)
+# 		# push to clients
+# 		for client_id in room.client_ids:
+# 			channel.send_message(client_id, message)
 
 class UploadHandler(BaseHandler):
 	def get(self):
@@ -165,7 +165,7 @@ def get_room_by_client_id(client_id):
 
 app = webapp2.WSGIApplication([('/', MainHandler),
 							   ('/upload', UploadHandler),
-							   ('/update', UpdateHandler),
+							   # ('/update', UpdateHandler),
 							   ('/paused', PausedHandler),
 							   ('/seek', SeekHandler),
 							   ('/_ah/channel/connected/', ConnectHandler),

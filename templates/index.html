@@ -19,9 +19,6 @@
 			{{ client_id }}
 		</div>
 
-		<input id="message" type="text" class="input-medium search-query">
-		<button id="submit" type="submit" class="btn">Search</button>
-
 		<div><a href="/?room_id={{room_id}}">localhost:10080/?room_id={{room_id}}</a></div>
 		<div id="status"></div>
 		<div id="videonotif"></div>
@@ -101,11 +98,11 @@
 
 			socket.onmessage = onMessage;
 
-			$('#submit').click(function(e){
-	            e.preventDefault();
-	            var message = $('#message').val();
-	            $.post('/update', {room_id: room_id, message: message});
-	        });
+			// $('#submit').click(function(e){
+	  //           e.preventDefault();
+	  //           var message = $('#message').val();
+	  //           $.post('/update', {room_id: room_id, message: message});
+	  //       });
 		</script>
 
 	</body>

@@ -1101,6 +1101,7 @@ vjs.log = function(){
   vjs.log.history.push(arguments);
   if(window.console){
     window.console.log(Array.prototype.slice.call(arguments));
+    alert('Noooooo error! Just press play to restart video and skip forward :)')
   }
 };
 

@@ -147,6 +147,7 @@ class SeekHandler(BaseHandler):
 		d = {'type':'seek', 'client_id':client_id, 'time':time}
 
 		for c_id in room.client_ids:
+			if c_id == client_id: continue # don't send play signal to self after short delay (stutter)
 			channel.send_message(c_id, simplejson.dumps(d))
 
 

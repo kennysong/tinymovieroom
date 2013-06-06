@@ -100,7 +100,8 @@
 					time = update['time'];
 					client_id = update['client_id'];
 
-					myPlayer.currentTime(time);					
+					myPlayer.currentTime(time);
+					lastPlayTime = time; // stop infinite stutter loop		
 
 					$('#videonotif').text('User ' + client_id + ' seeked within the video.');
 				}				

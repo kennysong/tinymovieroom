@@ -16,7 +16,10 @@ from google.appengine.api import urlfetch
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape=True)
 
-CLOUDFRONT_DOMAIN = 'http://ddmm37kppyxwy.cloudfront.net/'
+
+# CLOUDFRONT_DOMAIN = 'http://ddmm37kppyxwy.cloudfront.net/' 
+## strangely, S3 is way faster/no erroring compared to cloudfront
+S3_DOMAIN = 'https://s3.amazonaws.com/secretmovieroom/'
 TMDB_SEARCH_URL = 'http://api.themoviedb.org/3/search/movie?api_key=fc45f4e0c19068d8253cb0dcb0a1774e&query='
 TMDB_IMG_URL = 'http://d3gtl9l2a4fn1j.cloudfront.net/t/p/w185'
 
@@ -79,7 +82,7 @@ class UploadHandler(BaseHandler):
 
 	def post(self):
 		filename = self.rget('filename')
-		url = CLOUDFRONT_DOMAIN + filename
+		url = S3_DOMAIN + filename
 		name = self.rget('moviename')
 
 		# find movie cover
